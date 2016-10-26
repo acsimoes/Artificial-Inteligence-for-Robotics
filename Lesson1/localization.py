@@ -1,16 +1,20 @@
-#Write code that outputs p after multiplying each entry
-#by pHit or pMiss at the appropriate places. Remember that
-#the red cells 1 and 2 are hits and the other green cells
-#are misses.
+#Code for a very simple example of discrete localization
+#Uses both sensorial information represented by the sense
+#function as well as simulates movement of the robot through
+#function move.
 
 n=5
 p=[1./n]*n
+#p=[0,1,0,0,0]
 pHit = 0.6
 pMiss = 0.2
+pExact = 0.8
+pOvershoot = 0.1
+pUndershoot = 0.1
 
-#Enter code here
 world=['green','red','red','green','green']
-measuraments=['green','red']
+measurements = ['red', 'green']
+motions = [1,-1]
 
 def sense(p, Z):
     q=[]
@@ -22,14 +26,19 @@ def sense(p, Z):
         q[i]/=s
     return q
 
-for i in range(len(measuraments)):
-    p=sense(p,measuraments[i])
-
-print p
-
-def move(p, U):             #nice way to shift a list left or right in a circular way!
+def circular_shift(p, U):             #nice way to shift a list left or right in a circular way!
     n = U % len(p)
     q = p[-n:] + p[:-n]
     return q
 
-print move(p,-2)
+def move(p, U):
+    q = [0]*len(p)
+    for i in range(len(p)):
+        q[i] += (p[i-U%len(p)] * pExact + p[i-(U-1)%len(p)] * pOvershoot + p[i-(U+1)%len(p)] * pUndershoot)
+    return q
+
+for i in range(len(motions)):
+    p = sense(p,measurements[i])
+    p = move(p, motions[i])
+
+print p
