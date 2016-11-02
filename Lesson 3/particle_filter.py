@@ -145,6 +145,26 @@ p3 = []
 for i in range(N):
     p3.append(weighted_choice(p_set))
 p = p3
+
+index = [i for i in range(N)]
+print index
+
+def wheel_resampler(p,w):
+    size = len(w)
+    w_sum = sum(w)
+    index = [i for i in range(size)]
+    new_p = []
+
+    for i in range(size):
+        j = i
+        beta = random.uniform(0, 1)
+        while (w[index[j]]/w_sum) < beta:
+            j += 1
+        new_p.append(p[index[j]])
+
+    return new_p
+
+
 # myrobot = robot()
 # myrobot.set(30, 50, pi/2)
 # myrobot.set_noise(5.0, 0.1, 5.0)
