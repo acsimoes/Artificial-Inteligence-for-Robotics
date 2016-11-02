@@ -104,66 +104,70 @@ def eval(r, p):
 
 ####   DON'T MODIFY ANYTHING ABOVE HERE! ENTER CODE BELOW ####
 
-myrobot = robot()
-myrobot = myrobot.move(0.1, 5.0)
-Z = myrobot.sense()
-
-N = 1000
-p = []
-for i in range(N):
-    x = robot()
-    x.set_noise(0.01, 0.01, 5.0)
-    p.append(x)
-
-p_motion = []
-for i in range(len(p)):
-    p_motion.append(p[i].move(0.1, 5))
-p = p_motion
-
-w = []
-for i in range(N):
-    w.append(p_motion[i].measurement_prob(Z))
-
 import random
-def weighted_choice(choices):
-   total = sum(w for c, w in choices)
-   r = random.uniform(0, total)
+def weighted_choice(c,w):
+   w_sum = sum(w)
+   w_norm = [i/w_sum for i in w]
+   r = random.uniform(0, 1)
    upto = 0
-   for c, w in choices:
-      if upto + w >= r:
-         return c
-      upto += w
+   for i in range(len(c)):
+      if upto + w[i] >= r:
+         return c[i]
+      upto += w[i]
    assert False, "Shouldn't get here"
 
-w_sum = sum(w)
-print 'w_sum = ', w_sum
-p_set = []
-for i in range(N):
-    p_set.append([p[i],w[i]/w_sum])
-
-p3 = []
-for i in range(N):
-    p3.append(weighted_choice(p_set))
-p = p3
-
-index = [i for i in range(N)]
-print index
-
-def wheel_resampler(p,w):
+def wheel_resampler(p, w):
     size = len(w)
     w_sum = sum(w)
-    index = [i for i in range(size)]
     new_p = []
+    w_norm = [i/w_sum for i in w]
 
+    w_max = max(w_norm)
+    index = int(round(random.random() * size))
     for i in range(size):
-        j = i
-        beta = random.uniform(0, 1)
-        while (w[index[j]]/w_sum) < beta:
-            j += 1
-        new_p.append(p[index[j]])
+        beta = random.uniform(0, 2*w_max)
+        while w_norm[index] < beta:
+            beta = beta - w_norm[index]
+            index = (index + 1) % size
+
+        new_p.append(p[index])
 
     return new_p
 
+#Robot initialization
+myrobot = robot()
+myrobot = myrobot.move(0.1, 5.0)
+Z = myrobot.sense()
+N = 1000
+p = []
+
+#particles random initialization
+for i in range(N):
+    x = robot()
+    x.set_noise(0.05, 0.05, 5.0)
+    p.append(x)
+
+#we are just gonna loop this in order to see how the particle filter improves over time
+for k in range(10):
+
+    #robot moves and senses
+    myrobot = myrobot.move(0.1, 5.0)
+    Z = myrobot.sense()
+
+    # motion of particles the same ammount as robot
+    p_motion = []
+    for i in range(len(p)):
+        p_motion.append(p[i].move(0.1, 5))
+    p = p_motion
+
+    #weight calculation for each individual particle
+    w = []
+    for i in range(N):
+        w.append(p_motion[i].measurement_prob(Z))
+
+    p3 = wheel_resampler(p,w)
+    p = p3
+    print eval(myrobot,p)
 
 # myrobot = robot()
 # myrobot.set(30, 50, pi/2)
