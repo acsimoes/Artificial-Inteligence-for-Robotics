@@ -39,3 +39,6 @@ for i in range(20):
 
 for i in range(len(p)):
     print 'number of occurances of ' + p[i] + ' is: ', new_p.count(p[i])
+
+import math
+print math.degrees(math.atan2(1,0))
