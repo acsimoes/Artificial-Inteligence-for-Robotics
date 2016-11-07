@@ -1,27 +1,29 @@
-# ----------
+# -----------
 # User Instructions:
 #
-# Define a function, search() that returns a list
-# in the form of [optimal path length, row, col]. For
-# the grid shown below, your function should output
-# [11, 4, 5].
+# Modify the the search function so that it becomes
+# an A* search algorithm as defined in the previous
+# lectures.
 #
-# If there is no valid path from the start point
-# to the goal, your function should return the string
-# 'fail'
+# Your function should return the expanded grid
+# which shows, for each element, the count when
+# it was expanded or -1 if the element was never expanded.
+#
+# If there is no path from init to goal,
+# the function should return the string 'fail'
 # ----------
 
-# Grid format:
-#   0 = Navigable space
-#   1 = Occupied space
-
-import math
-import time
 grid = [[0, 1, 0, 0, 0, 0],
         [0, 1, 0, 0, 0, 0],
         [0, 1, 0, 0, 0, 0],
         [0, 1, 0, 0, 0, 0],
         [0, 0, 0, 0, 1, 0]]
+heuristic = [[9, 8, 7, 6, 5, 4],
+             [8, 7, 6, 5, 4, 3],
+             [7, 6, 5, 4, 3, 2],
+             [6, 5, 4, 3, 2, 1],
+             [5, 4, 3, 2, 1, 0]]
+
 init = [0, 0]
 goal = [len(grid) - 1, len(grid[0]) - 1]
 cost = 1
@@ -33,16 +35,17 @@ delta = [[-1, 0],  # go up
 
 delta_name = ['^', '<', 'v', '>']
 
+
 def print_grid(grid):
     grid_rows = len(grid)
     grid_cols = len(grid[0])
     for i in range(grid_rows):
         print grid[i]
 
-def path_grid(path_map, initial_position, final_position, grid):
+def print_path(path_map, initial_position, final_position, grid):
 
-    path = [[' ' for row in range(len(grid[0]))] for col in range(len(grid))]
-    path[final_position[0]][final_position[1]] = '*'
+    path_grid = [[' ' for row in range(len(grid[0]))] for col in range(len(grid))]
+    path_grid[final_position[0]][final_position[1]] = '*'
     current_x = final_position[0]
     current_y = final_position[1]
 
@@ -55,80 +58,20 @@ def path_grid(path_map, initial_position, final_position, grid):
         (previous_x, previous_y) = path_map[(current_x, current_y)]
 
         if(previous_x == current_x-1):
-            path[previous_x][previous_y] = 'v'
+            path_grid[previous_x][previous_y] = 'v'
         elif(previous_x == current_x+1):
-            path[previous_x][previous_y] = '^'
+            path_grid[previous_x][previous_y] = '^'
         elif (previous_y == current_y + 1):
-            path[previous_x][previous_y] = '<'
+            path_grid[previous_x][previous_y] = '<'
         else:
-            path[previous_x][previous_y] = '>'
+            path_grid[previous_x][previous_y] = '>'
 
         current_x = previous_x
         current_y = previous_y
 
-    print_grid(path)
+    print_grid(path_grid)
 
-    return path
-
-def optimum_policy(grid,goal,cost):
-
-    grid_rows = len(grid)
-    grid_cols = len(grid[0])
-    value = [[grid[col][row]*99 for row in range(len(grid[0]))] for col in range(len(grid))]
-    policy = [[' ' for row in range(len(grid[0]))] for col in range(len(grid))]
-    policy[goal[0]][goal[1]] = '*'
-
-    open = [[0, goal[0], goal[1]]]
-    end = False
-    # path_map = {}
-    while not end:
-
-        # selected_position position with lowest cost
-        min_value = float("inf")
-        selected = []  # position selected for expansion
-        for i in range(len(open)):
-            x = open[i][1]
-            y = open[i][2]
-            g = open[i][0]
-            if (min_value > g):
-                min_value = g
-                ind = i
-                selected = open[i]
-
-        del open[ind]
-        x2 = selected[1]
-        y2 = selected[2]
-        g2 = selected[0]
-        if(g2 == 0):
-            value[x2][y2] = 1
-        else:
-            value[x2][y2] = g2
-
-        #expand this position
-        for i in range(len(delta)):
-            x3 = x2 + delta[i][0]
-            y3 = y2 + delta[i][1]
-            g3 = g2 + cost
-            # check if whether position is possible (not out of bounds or inside obstacles)
-            if (min((x3, y3)) >= 0 and x3 < grid_rows and y3 < grid_cols):
-                if (value[x3][y3] == 0):
-                    # add to open
-                    policy[x3][y3] = delta_name[(i+2)%4]
-                    open.append((g3, x3, y3))
-                    #path_map[(x3, y3)] = (x2, y2)
-
-        if(len(open) == 0):
-            end = True
-            for x in range(grid_rows):
-                for y in range(grid_cols):
-                    if value[x][y] == 0:
-                        value[x][y] = 99
-            value[goal[0]][goal[1]] = 0
-
-    return policy
-
-
-def search(grid, init, goal, cost):
+def search(grid, init, goal, cost, heuristic):
     grid_rows = len(grid)
     grid_cols = len(grid[0])
     open = [[0, init[0], init[1]]]
@@ -150,8 +93,9 @@ def search(grid, init, goal, cost):
             x = open[i][1]
             y = open[i][2]
             g = open[i][0]
-            if (min_value > g):
-                min_value = g
+            f = g + heuristic[x][y]
+            if (min_value > f):
+                min_value = f
                 ind = i
                 selected = open[i]
 
@@ -179,7 +123,7 @@ def search(grid, init, goal, cost):
                         expand[x3][y3] = count
                         found = True
                         path_map[(x3, y3)] = (x2, y2)
-                        path_grid(path_map, init, goal,aux_grid)
+                        print_path(path_map, init, goal,aux_grid)
                     else:
                         #add next_position to the open_position
                         aux_grid[x3][y3] = 2
@@ -194,5 +138,4 @@ def search(grid, init, goal, cost):
     print_grid(expand)
     return path
 
-#print search(grid,init,goal,cost)
-print_grid(optimum_policy(grid,goal,cost))
+print search(grid,init,goal,cost,heuristic)

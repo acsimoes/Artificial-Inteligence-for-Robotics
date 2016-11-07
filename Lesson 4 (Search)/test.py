@@ -14,3 +14,6 @@ print 'dict[c] = ', dict[c]
 print 'dict[b] = ', dict[b]
 print d
 print e
+print (3,4) == c
+
+print (-1%3)
