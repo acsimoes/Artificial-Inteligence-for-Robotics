@@ -175,4 +175,4 @@ def optimum_policy2D(grid, init, goal, cost):
         policy = 'fail'
     return policy
 
-optimum_policy2D(grid, init, goal, cost)
+print_grid(optimum_policy2D(grid, init, goal, cost))

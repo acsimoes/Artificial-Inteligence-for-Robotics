@@ -194,5 +194,5 @@ def search(grid, init, goal, cost):
     print_grid(expand)
     return path
 
-#print search(grid,init,goal,cost)
+print search(grid,init,goal,cost)
 print_grid(optimum_policy(grid,goal,cost))

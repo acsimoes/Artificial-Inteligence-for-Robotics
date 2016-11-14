@@ -1,19 +1,8 @@
-a = (1,2)
-b = (2,3)
-c = (3,4)
-
-dict = {}
-dict[c] = b
-dict[b] = a
-
-(d,e) = dict[c]
-print "a = ", a
-print 'b = ', b
-print 'c = ', c
-print 'dict[c] = ', dict[c]
-print 'dict[b] = ', dict[b]
-print d
-print e
-print (3,4) == c
-
-print (-1%3)
+open = [[0,1,2], [0,1,3]]
+test = [[0,2,1], [0,2,2]]
+buff = []
+buff.append((0,2,1))
+buff.append((0,2,2))
+open.append(buff[0])
+open.append(buff[1])
+print open
