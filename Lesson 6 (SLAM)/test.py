@@ -397,4 +397,8 @@ def doit(initial_pos, move1, move2, Z0, Z1, Z2):
 
 doit(-3, 5, 3, 10, 5, 2)
 
+t = range(4,14)
+print t
+b = [0,1]
+print [0,1]+t
 
