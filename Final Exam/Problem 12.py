@@ -96,9 +96,11 @@ def search(grid, init, goal):
     grid_cols = len(grid[0])
     open = [[0, init[0], init[1]]]
     expand = [[-1 for row in range(len(grid[0]))] for col in range(len(grid))]
-    aux_grid = grid[:]              #auxiliary Grid that will have 2 on positions already visited
+    aux_grid = [[grid[col][row] for row in range(len(grid[0]))] for col in range(len(grid))]
+    # aux_grid = grid[:]              #auxiliary Grid that will have 2 on positions already visited
     aux_grid[init[0]][init[1]] = 2
-
+    # print 'aux_grid:'
+    # print_grid(aux_grid)
     path = []
     resign = False
     found = False
@@ -142,7 +144,7 @@ def search(grid, init, goal):
                         if([x3, y3] == goal):
                             print 'Reached Goal!'
                             goalCost = g3
-                            print 'goalCost = ', goalCost
+                            # print 'goalCost = ', goalCost
                             path = (g3, x3, y3)
                             expand[x3][y3] = count
                             found = True
@@ -175,24 +177,30 @@ def print_grid(grid):
 def plan(warehouse, dropzone, todo):
 
     finalCost = 0
-    print 'warehouse:'
-    print_grid(warehouse)
+    warehouse[dropzone[0]][dropzone[1]] = 0
+    # print 'warehouse:'
+    # print_grid(warehouse)
     for i in range(len(todo)):
-        print todo[i]
+        # print todo[i]
         goal = []
         end = False
-        for j in range(len(warehouse[0])):
-            for k in range(len(warehouse)):
-                print '(j,k) = ', (j, k), warehouse[j][k]
+        for j in range(len(warehouse)):
+            for k in range(len(warehouse[0])):
+                # print '(j,k) = ', (j, k), warehouse[j][k]
                 if todo[i] == warehouse[j][k]:
                     goal = [j, k]
-                    print 'goal = ', goal
+                    # print 'goal = ', goal
                     end = True
                     break
             if(end):
                 break
-
-        finalCost += search(warehouse, dropzone, todo[i])
+        warehouse[goal[0]][goal[1]] = 0
+        finalCost += search(warehouse, dropzone, goal)
+        # print 'Get Box\nFINALCOST = ', finalCost
+        # print 'warehouse:'
+        # print_grid(warehouse)
+        finalCost += search(warehouse, goal, dropzone)
+        # print 'Return to dropzone\nFINALCOST = ', finalCost
 
     return finalCost
 
